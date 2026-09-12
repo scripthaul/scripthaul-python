@@ -1,0 +1,30 @@
+[build-system]
+# setuptools 77 is the first release that understands the PEP 639 SPDX
+# `license` string and `license-files` below.
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scripthaul"
+version = "0.1.0"
+description = "Thin Python client for the ScriptHaul transcript API"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "ScriptHaul", email = "support@scripthaul.com" }]
+keywords = ["youtube", "transcript", "captions", "api"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://api.scripthaul.com/docs"
+Documentation = "https://api.scripthaul.com/docs"
+Support = "https://api.scripthaul.com/docs"
+Repository = "https://github.com/scripthaul/scripthaul-python"
+Issues = "https://github.com/scripthaul/scripthaul-python/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
