@@ -21,7 +21,7 @@ TERMINAL_JOB_STATUSES = {"completed", "failed", "cancelled"}
 MAX_POLL_DELAY = 30.0
 # Fallback for a source checkout that was never installed; the test suite pins
 # it to pyproject.toml so the two cannot drift.
-_FALLBACK_VERSION = "0.1.0"
+_FALLBACK_VERSION = "0.2.0"
 
 
 def _detect_version():
@@ -329,7 +329,7 @@ class Jobs:
     def __init__(self, client):
         self._client = client
 
-    def create(self, input=None, *, idempotency_key=None, **options):
+    def create(self, input=None, *, translate=None, idempotency_key=None, **options):
         if not input:
             raise InvalidInput("jobs.create() requires an input.",
                                code="missing_job_input")
@@ -337,6 +337,8 @@ class Jobs:
             payload = {**input, **options}
         else:
             payload = {"input": input, **options}
+        if translate is not None:
+            payload["translate"] = translate
         headers = {"Idempotency-Key": idempotency_key or str(uuid.uuid4())}
         result = self._client._request("POST", "/v1/jobs", body=payload,
                                       headers=headers)
@@ -585,7 +587,7 @@ class ScriptHaul:
             raise InvalidInput("transcript() requires a video id.",
                                code="missing_video_id")
         allowed = {key: options[key] for key in
-                   ("format", "language", "fallback", "raw", "fresh") if key in options}
+                   ("format", "language", "fallback", "raw", "fresh", "translate") if key in options}
         query = _query({"video_id": video_id, **allowed})
         return self._request("GET", "/v1/transcript?" + query, poll_202=True)
 

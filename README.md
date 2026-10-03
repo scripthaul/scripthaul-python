@@ -18,6 +18,14 @@ videos = client.videos("https://www.youtube.com/@example")
 job = client.jobs.create(input="https://www.youtube.com/@example").wait()
 ```
 
+## Transcripts
+
+`client.transcript(video_id, **options)` accepts `translate` (default `False`). Set `language="es", translate=True` to receive the requested language when YouTube declines to translate the captions, if it can be delivered. A transcript delivered this way costs 300 credits per started 10,000 characters of transcript (at most 1,500), on top of the delivery credit; nothing extra is charged when it cannot be delivered. Without `translate`, nothing changes.
+
+## Jobs
+
+`client.jobs.create()` accepts `translate` (default `False`) alongside `input`, `language`, `fallback`, and `webhook_url`. Set `translate=True` to ask for the job's language on videos whose captions YouTube declines to translate. A transcript delivered this way costs 300 credits per started 10,000 characters of transcript (at most 1,500), on top of the delivery credit; nothing extra is charged when it cannot be delivered. These translations are charged per video when delivered, never reserved. Opted-in jobs carry `translate: true` and a `translation_credits` total; their video rows carry `translation_credits`. Without `translate`, nothing changes.
+
 ## Discovery
 
 Search YouTube or one channel for one credit per delivered page. Identical requests within 60 seconds are free retries. Channel resolution and the latest 15 channel or playlist entries cost zero credits; latest entries come from a feed cached for ten minutes.

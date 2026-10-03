@@ -31,6 +31,68 @@ def job_body(status, request_id="req-job", **extra):
 
 
 class ClientTests(unittest.TestCase):
+    def test_transcript_translate_encodes_explicit_booleans(self):
+        calls = []
+
+        def transport(method, url, headers, body, timeout):
+            calls.append((method, urlparse(url), body))
+            return response(200, {"ok": True, "text": "Fixture"})
+
+        client = ScriptHaul("sh_test_unit_fixture", transport=transport)
+        for value, encoded in [(True, "true"), (False, "false")]:
+            with self.subTest(translate=value):
+                client.transcript("dQw4w9WgXcQ", language="fr", translate=value)
+                method, url, body = calls[-1]
+                self.assertEqual(method, "GET")
+                self.assertEqual(url.path, "/v1/transcript")
+                self.assertEqual(parse_qs(url.query), {
+                    "video_id": ["dQw4w9WgXcQ"], "language": ["fr"],
+                    "translate": [encoded],
+                })
+                self.assertIsNone(body)
+
+    def test_job_create_preserves_translate_in_body(self):
+        calls = []
+
+        def transport(method, url, headers, body, timeout):
+            calls.append((method, urlparse(url), json.loads(body)))
+            return response(202, {"ok": True, "job": {"id": "job-1", "status": "pending"}})
+
+        client = ScriptHaul("sh_test_unit_fixture", transport=transport)
+        for value in [True, False]:
+            with self.subTest(translate=value):
+                client.jobs.create(input="https://youtube.com/@fixture", language="fr", translate=value)
+                method, url, body = calls[-1]
+                self.assertEqual(method, "POST")
+                self.assertEqual(url.path, "/v1/jobs")
+                self.assertEqual(url.query, "")
+                self.assertEqual(body, {
+                    "input": "https://youtube.com/@fixture", "language": "fr", "translate": value,
+                })
+                self.assertIs(body["translate"], value)
+        client.jobs.create({"input": "https://youtube.com/@fixture", "translate": True})
+        self.assertIs(calls[-1][2]["translate"], True)
+        client.jobs.create({"input": "https://youtube.com/@fixture", "translate": True}, translate=False)
+        self.assertIs(calls[-1][2]["translate"], False)
+
+    def test_translate_is_omitted_when_unset(self):
+        calls = []
+
+        def transport(method, url, headers, body, timeout):
+            parsed = urlparse(url)
+            calls.append((parse_qs(parsed.query), json.loads(body) if body else None))
+            if method == "POST":
+                return response(202, {"ok": True, "job": {"id": "job-1", "status": "pending"}})
+            return response(200, {"ok": True, "text": "Fixture"})
+
+        client = ScriptHaul("sh_test_unit_fixture", transport=transport)
+        for options in [{}, {"translate": None}]:
+            with self.subTest(options=options):
+                client.transcript("dQw4w9WgXcQ", **options)
+                self.assertEqual(calls[-1], ({"video_id": ["dQw4w9WgXcQ"]}, None))
+                client.jobs.create(input="https://youtube.com/@fixture", **options)
+                self.assertEqual(calls[-1], ({}, {"input": "https://youtube.com/@fixture"}))
+
     def test_discovery_encodes_queries_and_preserves_credit_headers(self):
         calls = []
 
