@@ -6,7 +6,7 @@ Dependency-free, synchronous ScriptHaul API client for Python 3.9+. MIT licensed
 pip install scripthaul
 ```
 
-Until the first PyPI release, install straight from GitHub: `pip install git+https://github.com/scripthaul/scripthaul-python`. Issues and pull requests are welcome in this repository; the API itself is documented at [api.scripthaul.com/docs](https://api.scripthaul.com/docs).
+Issues and pull requests are welcome in this repository; the API itself is documented at [api.scripthaul.com/docs](https://api.scripthaul.com/docs).
 
 ```python
 from scripthaul import ScriptHaul
